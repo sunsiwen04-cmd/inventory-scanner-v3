@@ -1,238 +1,264 @@
-// =====================================
-// Inventory Scanner V3
-// script.js V3
-// Barcode Scanner Optimized
-// =====================================
+const scriptURL = "https://script.google.com/macros/s/AKfycbwXL948q6a3fBEDv_2XgNsYFRmB317QCKsnor6zLGhQDHbd3glIuACEBPwlaBgga6B_/exec";
 
-
-// Elements
-
-const inBtn = document.getElementById("inBtn");
-const outBtn = document.getElementById("outBtn");
-
-const modeText = document.getElementById("modeText");
-
-const barcode = document.getElementById("barcode");
-const productName = document.getElementById("productName");
-const expiry = document.getElementById("expiry");
-const batchNumber = document.getElementById("batchNumber");
-
-const pieces = document.getElementById("pieces");
-const cartons = document.getElementById("cartons");
-const qty = document.getElementById("qty");
-
-const writer = document.getElementById("writer");
-
-const submitBtn = document.getElementById("submitBtn");
-
-const successMessage = document.getElementById("successMessage");
-
-
-// Worker
-
-const workerURL =
-"https://inventory-scanner-v3.sunsiwen04.workers.dev/";
-
-
-// Current Mode
 
 let currentMode = "IN";
 
-let scannerRunning = false;
+let html5QrCode = null;
+
+let cameraRunning = false;
 
 
-// =====================================
-// Mode
-// =====================================
+
+// =====================
+// IN / OUT BUTTON
+// =====================
+
+document.getElementById("btnIn").onclick = function(){
+
+    currentMode = "IN";
+
+    document.getElementById("btnIn")
+    .classList.add("active");
+
+    document.getElementById("btnOut")
+    .classList.remove("active");
 
 
-inBtn.onclick = function(){
-
-    setMode("IN");
+    document.getElementById("modeBanner")
+    .innerHTML =
+    "🟢 CURRENT MODE : IN";
 
 };
 
 
-outBtn.onclick = function(){
 
-    setMode("OUT");
+document.getElementById("btnOut").onclick = function(){
+
+    currentMode = "OUT";
+
+    document.getElementById("btnOut")
+    .classList.add("active");
+
+    document.getElementById("btnIn")
+    .classList.remove("active");
+
+
+    document.getElementById("modeBanner")
+    .innerHTML =
+    "🔴 CURRENT MODE : OUT";
 
 };
 
 
 
-function setMode(mode){
-
-    currentMode = mode;
-
-    modeText.innerText = mode;
 
 
-    if(mode==="IN"){
 
-        inBtn.classList.add("active");
-        outBtn.classList.remove("active");
+// =====================
+// START CAMERA
+// =====================
 
+function startCamera(){
+
+
+    if(cameraRunning){
+        return;
     }
-    else{
 
-        outBtn.classList.add("active");
-        inBtn.classList.remove("active");
 
-    }
 
-}
+    html5QrCode = new Html5QrCode("reader");
 
 
 
-// =====================================
-// Start when page open
-// =====================================
+    html5QrCode.start(
 
+        {
+            facingMode:"environment"
+        },
 
-window.onload=function(){
 
-    setMode("IN");
+        {
+            fps:10
+        },
 
-    startScanner();
 
-};
+        onScanSuccess,
 
 
+        onScanFailure
 
 
-// =====================================
-// Scanner
-// =====================================
+    )
 
 
-function startScanner(){
+    .then(()=>{
 
 
-if(scannerRunning){
-    return;
-}
+        cameraRunning = true;
 
 
-Quagga.init({
+        console.log("Camera Started");
 
 
-    inputStream:{
+    })
 
 
-        name:"Live",
+    .catch(err=>{
 
-
-        type:"LiveStream",
-
-
-        target:document.querySelector("#camera"),
-
-
-        constraints:{
-
-
-            facingMode:"environment",
-
-
-            width:{
-                min:1280
-            },
-
-
-            height:{
-                min:720
-            }
-
-        }
-
-    },
-
-
-
-    locator:{
-
-
-        patchSize:"medium",
-
-        halfSample:false
-
-    },
-
-
-
-    frequency:10,
-
-
-
-    decoder:{
-
-
-        readers:[
-
-
-            "ean_reader",
-
-            "ean_13_reader",
-
-            "code_128_reader"
-
-
-        ],
-
-
-        multiple:false
-
-
-    },
-
-
-    locate:true
-
-
-
-},function(err){
-
-
-    if(err){
 
         console.log(err);
 
-        return;
+
+    });
+
+
+
+}
+
+
+
+
+// =====================
+// OPEN CAMERA
+// =====================
+
+
+startCamera();
+
+
+
+
+
+
+
+// =====================
+// SCAN SUCCESS
+// =====================
+
+function onScanSuccess(decodedText){
+
+
+
+    console.log("Scan:", decodedText);
+
+
+
+    document.getElementById("barcode")
+    .value = decodedText;
+
+
+
+
+    // stop camera after scan
+
+
+    if(html5QrCode){
+
+
+        html5QrCode.stop()
+
+
+        .then(()=>{
+
+
+            cameraRunning = false;
+
+
+            console.log("Camera stopped");
+
+
+        })
+
+
+        .catch(err=>{
+
+
+            console.log(err);
+
+
+        });
+
 
     }
 
 
 
-    Quagga.start();
-
-
-    scannerRunning=true;
-
-
-
-});
+}
 
 
 
 
 
-Quagga.onDetected(function(result){
+
+
+// =====================
+// SCAN FAILURE
+// =====================
+
+function onScanFailure(error){
+
+    // 不显示错误
+
+}
 
 
 
-    let code =
-    result.codeResult.code;
 
 
 
-    console.log("SCAN:",code);
+
+// =====================
+// SUBMIT TO GOOGLE SHEET
+// =====================
+
+
+document.getElementById("submitBtn")
+.onclick=function(){
 
 
 
-    // only accept 13 digits
+    const data = {
 
-    if(!/^\d{13}$/.test(code)){
+
+        barcode:
+        document.getElementById("barcode").value,
+
+
+        mode:
+        currentMode,
+
+
+        batch:
+        document.getElementById("batch").value,
+
+
+        pieces:
+        document.getElementById("pieces").value,
+
+
+        cartons:
+        document.getElementById("cartons").value,
+
+
+        qty:
+        document.getElementById("qty").value,
+
+
+        writer:
+        document.getElementById("writer").value
+
+
+    };
+
+
+
+
+
+    if(data.barcode===""){
+
+
+        alert("Please scan barcode");
 
 
         return;
@@ -242,196 +268,79 @@ Quagga.onDetected(function(result){
 
 
 
-    barcode.value=code;
 
 
 
-    stopScanner();
 
+    fetch(scriptURL,{
 
 
-});
+        method:"POST",
 
 
+        body:JSON.stringify(data)
 
-}
 
+    })
 
 
-// =====================================
-// Stop Scanner
-// =====================================
 
+    .then(response=>response.text())
 
-function stopScanner(){
 
 
-if(scannerRunning){
+    .then(result=>{
 
 
-    Quagga.stop();
 
+        console.log(result);
 
-    scannerRunning=false;
 
 
-}
+        alert("Submitted Successfully");
 
 
-}
 
 
 
+        // 清空 Barcode
 
-// =====================================
-// Submit
-// =====================================
 
+        document.getElementById("barcode")
+        .value="";
 
-submitBtn.onclick=function(){
 
 
 
-let data={
 
+        // 自动重新开启 Camera
 
-mode:currentMode,
 
-barcode:barcode.value,
+        setTimeout(()=>{
 
-productName:productName.value,
 
-batch:batchNumber.value,
+            startCamera();
 
-expiry:expiry.value,
 
-pieces:pieces.value,
+        },500);
 
-cartons:cartons.value,
 
-qty:qty.value,
 
-writer:writer.value
+    })
 
 
-};
 
+    .catch(error=>{
 
 
-fetch(workerURL,{
+        console.log(error);
 
 
-method:"POST",
+        alert("Submit Failed");
 
 
-headers:{
-
-
-"Content-Type":"application/json"
-
-
-},
-
-
-body:JSON.stringify(data)
-
-
-
-})
-
-
-.then(res=>res.text())
-
-
-.then(result=>{
-
-
-console.log(result);
-
-
-showSuccess();
-
-
-clearForm();
-
-
-setTimeout(()=>{
-
-
-startScanner();
-
-
-},500);
-
-
-
-})
-
-
-
-.catch(err=>{
-
-
-console.log(err);
-
-
-});
+    });
 
 
 
 };
-
-
-
-
-// =====================================
-// Success
-// =====================================
-
-
-function showSuccess(){
-
-
-successMessage.style.display="block";
-
-
-setTimeout(()=>{
-
-
-successMessage.style.display="none";
-
-
-},1500);
-
-
-
-}
-
-
-
-// =====================================
-// Clear
-// =====================================
-
-
-function clearForm(){
-
-
-barcode.value="";
-
-productName.value="";
-
-batchNumber.value="";
-
-expiry.value="";
-
-pieces.value="";
-
-cartons.value="";
-
-qty.value="";
-
-writer.selectedIndex=0;
-
-
-}
