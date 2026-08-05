@@ -1,1 +1,91 @@
-
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f3f5f7;
+  color:#333;
+}
+.container{
+  max-width:520px;
+  margin:20px auto;
+  padding:16px;
+}
+h1{
+  text-align:center;
+  margin-bottom:20px;
+}
+.mode{
+  display:flex;
+  gap:12px;
+  margin-bottom:18px;
+}
+.mode button{
+  flex:1;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+  background:#ddd;
+}
+.mode button.active{
+  background:#2e7d32;
+  color:#fff;
+}
+#outBtn.active{
+  background:#c62828;
+}
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:18px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  margin-bottom:18px;
+}
+#reader{
+  min-height:240px;
+  border:2px dashed #bbb;
+  border-radius:12px;
+}
+label{
+  display:block;
+  margin:14px 0 6px;
+  font-weight:bold;
+}
+input,select{
+  width:100%;
+  padding:12px;
+  border:1px solid #ccc;
+  border-radius:10px;
+  font-size:16px;
+}
+input[readonly]{
+  background:#f8f8f8;
+}
+#submitBtn{
+  width:100%;
+  margin-top:20px;
+  padding:15px;
+  border:none;
+  border-radius:12px;
+  background:#1976d2;
+  color:#fff;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+}
+#submitBtn:hover{
+  opacity:.95;
+}
+#successMessage{
+  position:fixed;
+  left:50%;
+  bottom:30px;
+  transform:translateX(-50%);
+  background:#2e7d32;
+  color:#fff;
+  padding:14px 22px;
+  border-radius:10px;
+  font-weight:bold;
+}
