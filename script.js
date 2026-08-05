@@ -1,11 +1,13 @@
+//
 // Inventory Scanner V3
-// script.js (V1)
+// script.js V2
+//
 
-// ----------------------------
-// Elements
-// ----------------------------
+
 const inBtn = document.getElementById("inBtn");
 const outBtn = document.getElementById("outBtn");
+
+const modeText = document.getElementById("modeText");
 
 const barcode = document.getElementById("barcode");
 const productName = document.getElementById("productName");
@@ -15,129 +17,309 @@ const batchNumber = document.getElementById("batchNumber");
 const pieces = document.getElementById("pieces");
 const cartons = document.getElementById("cartons");
 const qty = document.getElementById("qty");
+
 const writer = document.getElementById("writer");
 
 const submitBtn = document.getElementById("submitBtn");
+
 const successMessage = document.getElementById("successMessage");
 
-// ----------------------------
-// Current Mode
-// ----------------------------
-let currentMode = "IN";
 
-// ----------------------------
-// Default Page
-// ----------------------------
-window.onload = () => {
+// ========================
+// Worker URL
+// ========================
+
+const workerURL =
+"https://inventory-scanner-v3.sunsiwen04.workers.dev/";
+
+
+// ========================
+// Mode
+// ========================
+
+let currentMode="IN";
+
+
+
+inBtn.onclick=function(){
+
     setMode("IN");
+
 };
 
-// ----------------------------
-// Mode Switch
-// ----------------------------
-inBtn.addEventListener("click", () => {
-    setMode("IN");
-});
 
-outBtn.addEventListener("click", () => {
+outBtn.onclick=function(){
+
     setMode("OUT");
-});
 
-function setMode(mode) {
+};
 
-    currentMode = mode;
 
-    if (mode === "IN") {
+
+function setMode(mode){
+
+    currentMode=mode;
+
+    modeText.innerText=mode;
+
+
+    if(mode==="IN"){
 
         inBtn.classList.add("active");
         outBtn.classList.remove("active");
 
-        batchNumber.readOnly = false;
-        expiry.disabled = false;
-
-    } else {
+    }else{
 
         outBtn.classList.add("active");
         inBtn.classList.remove("active");
-
-        batchNumber.readOnly = true;
-        expiry.disabled = false;
 
     }
 
 }
 
-// ----------------------------
-// Submit
-// ----------------------------
-submitBtn.addEventListener("click", () => {
 
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Saving...";
 
-    setTimeout(() => {
+// ========================
+// Start Camera
+// ========================
 
-        showSuccess();
+window.onload=function(){
 
-        clearForm();
+    setMode("IN");
 
-        submitBtn.disabled = false;
-        submitBtn.innerText = "Submit";
+    startScanner();
 
-        // V2/V3 后面这里会加入：
-        // startScanner();
+};
 
-    }, 1000);
+
+
+
+// ========================
+// Quagga Scanner
+// ========================
+
+function startScanner(){
+
+
+Quagga.init({
+
+    inputStream:{
+
+        name:"Live",
+
+        type:"LiveStream",
+
+        target:document.querySelector("#camera"),
+
+        constraints:{
+
+            facingMode:"environment"
+
+        }
+
+    },
+
+
+    decoder:{
+
+        readers:[
+
+            "ean_reader"
+
+        ]
+
+    }
+
+
+},function(err){
+
+
+    if(err){
+
+        console.log(err);
+
+        return;
+
+    }
+
+
+    Quagga.start();
+
 
 });
 
-// ----------------------------
-// Success Message
-// ----------------------------
-function showSuccess() {
 
-    successMessage.style.display = "block";
 
-    setTimeout(() => {
-        successMessage.style.display = "none";
-    }, 1500);
+Quagga.onDetected(function(result){
 
-}
 
-// ----------------------------
-// Clear Form
-// ----------------------------
-function clearForm() {
+    let code=result.codeResult.code;
 
-    barcode.value = "";
-    productName.value = "";
 
-    expiry.selectedIndex = 0;
+    if(code){
 
-    batchNumber.value = "";
 
-    pieces.value = "";
-    cartons.value = "";
-    qty.value = "";
+        barcode.value=code;
 
-    writer.selectedIndex = 0;
+
+        stopScanner();
+
+
+    }
+
+
+});
+
 
 }
 
-// ----------------------------
-// Future Functions
-// ----------------------------
 
-// startScanner()
 
-// stopScanner()
+// ========================
+// Stop Camera
+// ========================
 
-// getProduct()
+function stopScanner(){
 
-// getExpiry()
+    Quagga.stop();
 
-// getBatch()
+}
 
-// submitToGoogle()
 
-// generateTransactionID()
+
+// ========================
+// Submit
+// ========================
+
+submitBtn.onclick=function(){
+
+
+
+let data={
+
+
+    mode:currentMode,
+
+    barcode:barcode.value,
+
+    productName:productName.value,
+
+    batch:batchNumber.value,
+
+    expiry:expiry.value,
+
+    pieces:pieces.value,
+
+    cartons:cartons.value,
+
+    qty:qty.value,
+
+    writer:writer.value
+
+
+};
+
+
+
+
+fetch(workerURL,{
+
+    method:"POST",
+
+    headers:{
+
+        "Content-Type":"application/json"
+
+    },
+
+    body:JSON.stringify(data)
+
+
+})
+
+
+.then(res=>res.text())
+
+
+.then(result=>{
+
+
+    console.log(result);
+
+
+    showSuccess();
+
+
+    clearForm();
+
+
+    startScanner();
+
+
+
+})
+
+
+.catch(error=>{
+
+
+    console.log(error);
+
+
+});
+
+
+
+};
+
+
+
+
+// ========================
+// Success
+// ========================
+
+
+function showSuccess(){
+
+successMessage.style.display="block";
+
+
+setTimeout(()=>{
+
+successMessage.style.display="none";
+
+
+},1500);
+
+
+}
+
+
+
+// ========================
+// Clear
+// ========================
+
+
+function clearForm(){
+
+
+barcode.value="";
+
+productName.value="";
+
+batchNumber.value="";
+
+expiry.value="";
+
+pieces.value="";
+
+cartons.value="";
+
+qty.value="";
+
+writer.selectedIndex=0;
+
+
+}
