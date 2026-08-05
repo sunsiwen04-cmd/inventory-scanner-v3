@@ -1,4 +1,4 @@
-const scriptURL = "https://script.google.com/macros/s/AKfycbwXL948q6a3fBEDv_2XgNsYFRmB317QCKsnor6zLGhQDHbd3glIuACEBPwlaBgga6B_/exec";
+const scriptURL = "https://script.google.com/macros/s/AKfycbz2SVM9HK07_m5skHCUacBHYdplyOFfyrR888mPleCIX9F2JjLqxmA45lk3nEe2iY3vxA/exec";
 
 
 let currentMode = "IN";
@@ -7,45 +7,60 @@ let html5QrCode = null;
 
 let cameraRunning = false;
 
+let lastScan = "";
+
 
 
 // =====================
-// IN / OUT BUTTON
+// IN / OUT
 // =====================
 
-document.getElementById("btnIn").onclick = function(){
 
-    currentMode = "IN";
-
-    document.getElementById("btnIn")
-    .classList.add("active");
-
-    document.getElementById("btnOut")
-    .classList.remove("active");
+document.getElementById("btnIn").onclick=function(){
 
 
-    document.getElementById("modeBanner")
-    .innerHTML =
-    "🟢 CURRENT MODE : IN";
+currentMode="IN";
+
+
+document.getElementById("btnIn")
+.classList.add("active");
+
+
+document.getElementById("btnOut")
+.classList.remove("active");
+
+
+
+document.getElementById("modeBanner")
+.innerHTML="🟢 CURRENT MODE : IN";
+
+
 
 };
 
 
 
-document.getElementById("btnOut").onclick = function(){
-
-    currentMode = "OUT";
-
-    document.getElementById("btnOut")
-    .classList.add("active");
-
-    document.getElementById("btnIn")
-    .classList.remove("active");
 
 
-    document.getElementById("modeBanner")
-    .innerHTML =
-    "🔴 CURRENT MODE : OUT";
+document.getElementById("btnOut").onclick=function(){
+
+
+currentMode="OUT";
+
+
+document.getElementById("btnOut")
+.classList.add("active");
+
+
+document.getElementById("btnIn")
+.classList.remove("active");
+
+
+
+document.getElementById("modeBanner")
+.innerHTML="🔴 CURRENT MODE : OUT";
+
+
 
 };
 
@@ -58,59 +73,63 @@ document.getElementById("btnOut").onclick = function(){
 // START CAMERA
 // =====================
 
+
 function startCamera(){
 
 
-    if(cameraRunning){
-        return;
-    }
+
+if(cameraRunning){
+
+return;
+
+}
 
 
 
-    html5QrCode = new Html5QrCode("reader");
+html5QrCode = new Html5QrCode("reader");
 
 
 
-    html5QrCode.start(
-
-        {
-            facingMode:"environment"
-        },
+html5QrCode.start(
 
 
-        {
-            fps:10
-        },
+{facingMode:"environment"},
 
 
-        onScanSuccess,
+{
+fps:10
+},
 
 
-        onScanFailure
+onScanSuccess,
 
 
-    )
+onScanFailure
 
 
-    .then(()=>{
+
+)
 
 
-        cameraRunning = true;
+.then(()=>{
 
 
-        console.log("Camera Started");
+cameraRunning=true;
 
 
-    })
+console.log("Camera Start");
 
 
-    .catch(err=>{
+})
 
 
-        console.log(err);
+.catch(err=>{
 
 
-    });
+console.log(err);
+
+
+});
 
 
 
@@ -119,12 +138,9 @@ function startCamera(){
 
 
 
-// =====================
-// OPEN CAMERA
-// =====================
-
 
 startCamera();
+
 
 
 
@@ -136,51 +152,52 @@ startCamera();
 // SCAN SUCCESS
 // =====================
 
+
 function onScanSuccess(decodedText){
 
 
 
-    console.log("Scan:", decodedText);
+if(decodedText===lastScan){
+
+return;
+
+}
 
 
 
-    document.getElementById("barcode")
-    .value = decodedText;
+lastScan=decodedText;
+
+
+
+console.log("Scan:",decodedText);
+
+
+
+document.getElementById("barcode")
+.value=decodedText;
+
+
+
+stopCamera();
 
 
 
 
-    // stop camera after scan
+// 查询 Product
+
+getProduct(decodedText);
 
 
-    if(html5QrCode){
+
+// OUT 自动 FEFO
+
+if(currentMode==="OUT"){
 
 
-        html5QrCode.stop()
+getFEFO(decodedText);
 
 
-        .then(()=>{
-
-
-            cameraRunning = false;
-
-
-            console.log("Camera stopped");
-
-
-        })
-
-
-        .catch(err=>{
-
-
-            console.log(err);
-
-
-        });
-
-
-    }
+}
 
 
 
@@ -191,14 +208,58 @@ function onScanSuccess(decodedText){
 
 
 
-
-// =====================
-// SCAN FAILURE
-// =====================
 
 function onScanFailure(error){
 
-    // 不显示错误
+// 不显示错误
+
+}
+
+
+
+
+
+
+
+
+// =====================
+// STOP CAMERA
+// =====================
+
+
+function stopCamera(){
+
+
+if(html5QrCode){
+
+
+html5QrCode.stop()
+
+
+.then(()=>{
+
+
+cameraRunning=false;
+
+
+console.log("Camera stopped");
+
+
+})
+
+
+.catch(err=>{
+
+
+console.log(err);
+
+
+});
+
+
+}
+
+
 
 }
 
@@ -209,7 +270,146 @@ function onScanFailure(error){
 
 
 // =====================
-// SUBMIT TO GOOGLE SHEET
+// GET PRODUCT
+// =====================
+
+
+function getProduct(barcode){
+
+
+
+fetch(
+
+scriptURL+
+
+"?action=product&barcode="+barcode
+
+
+)
+
+
+.then(res=>res.json())
+
+
+.then(data=>{
+
+
+console.log(data);
+
+
+
+if(data.product){
+
+
+document.getElementById("product")
+.value=data.product;
+
+
+}
+
+
+
+})
+
+
+.catch(err=>{
+
+
+console.log(err);
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================
+// GET FEFO
+// =====================
+
+
+function getFEFO(barcode){
+
+
+
+fetch(
+
+scriptURL+
+
+"?action=fefo&barcode="+barcode
+
+
+)
+
+
+
+.then(res=>res.json())
+
+
+.then(data=>{
+
+
+
+console.log(data);
+
+
+
+if(data.found){
+
+
+
+document.getElementById("product")
+.value=data.product;
+
+
+
+document.getElementById("batch")
+.value=data.batch;
+
+
+
+document.getElementById("expiry")
+.value=data.expiry;
+
+
+
+}
+
+
+
+})
+
+
+.catch(err=>{
+
+
+console.log(err);
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================
+// SUBMIT
 // =====================
 
 
@@ -218,129 +418,208 @@ document.getElementById("submitBtn")
 
 
 
-    const data = {
+const data={
 
 
-        barcode:
-        document.getElementById("barcode").value,
 
+barcode:
 
-        mode:
-        currentMode,
+document.getElementById("barcode").value,
 
 
-        batch:
-        document.getElementById("batch").value,
 
+mode:
 
-        pieces:
-        document.getElementById("pieces").value,
+currentMode,
 
 
-        cartons:
-        document.getElementById("cartons").value,
 
+product:
 
-        qty:
-        document.getElementById("qty").value,
+document.getElementById("product").value,
 
 
-        writer:
-        document.getElementById("writer").value
 
+batch:
 
-    };
+document.getElementById("batch").value,
 
 
 
+expiry:
 
+document.getElementById("expiry").value,
 
-    if(data.barcode===""){
 
 
-        alert("Please scan barcode");
+pieces:
 
+document.getElementById("pieces").value,
 
-        return;
 
 
-    }
+cartons:
 
+document.getElementById("cartons").value,
 
 
 
+qty:
 
+document.getElementById("qty").value,
 
 
-    fetch(scriptURL,{
 
+writer:
 
-        method:"POST",
-
-
-        body:JSON.stringify(data)
-
-
-    })
-
-
-
-    .then(response=>response.text())
-
-
-
-    .then(result=>{
-
-
-
-        console.log(result);
-
-
-
-        alert("Submitted Successfully");
-
-
-
-
-
-        // 清空 Barcode
-
-
-        document.getElementById("barcode")
-        .value="";
-
-
-
-
-
-        // 自动重新开启 Camera
-
-
-        setTimeout(()=>{
-
-
-            startCamera();
-
-
-        },500);
-
-
-
-    })
-
-
-
-    .catch(error=>{
-
-
-        console.log(error);
-
-
-        alert("Submit Failed");
-
-
-    });
+document.getElementById("writer").value
 
 
 
 };
+
+
+
+
+
+
+if(data.barcode===""){
+
+
+alert("Please scan barcode");
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+fetch(scriptURL,{
+
+
+method:"POST",
+
+
+body:JSON.stringify(data)
+
+
+
+})
+
+
+
+.then(res=>res.text())
+
+
+.then(result=>{
+
+
+console.log(result);
+
+
+alert("Submitted Successfully");
+
+
+
+clearForm();
+
+
+
+
+setTimeout(()=>{
+
+
+lastScan="";
+
+
+startCamera();
+
+
+},500);
+
+
+
+
+})
+
+
+
+.catch(error=>{
+
+
+console.log(error);
+
+
+alert("Submit Failed");
+
+
+});
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================
+// CLEAR
+// =====================
+
+
+function clearForm(){
+
+
+
+document.getElementById("barcode")
+.value="";
+
+
+
+document.getElementById("product")
+.value="";
+
+
+
+document.getElementById("batch")
+.value="";
+
+
+
+document.getElementById("expiry")
+.value="";
+
+
+
+document.getElementById("pieces")
+.value="";
+
+
+
+document.getElementById("cartons")
+.value="";
+
+
+
+document.getElementById("qty")
+.value="";
+
+
+
+document.getElementById("writer")
+.selectedIndex=0;
+
+
+
+}
