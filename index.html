@@ -1,57 +1,187 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Inventory Scanner V3</title>
-<link rel="stylesheet" href="style.css">
+
+<style>
+
+body{
+    font-family: Arial;
+    background:#f2f2f2;
+    margin:0;
+}
+
+.container{
+    max-width:420px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:15px;
+}
+
+h2{
+    text-align:center;
+}
+
+.mode{
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+}
+
+.active{
+    background:#28a745;
+    color:white;
+}
+
+.out{
+    background:#dc3545;
+    color:white;
+}
+
+input,select{
+    width:100%;
+    padding:10px;
+    margin-top:8px;
+    box-sizing:border-box;
+}
+
+#camera{
+    width:100%;
+    height:260px;
+    overflow:hidden;
+    margin-top:15px;
+}
+
+video{
+    width:100%;
+}
+
+#successMessage{
+    display:none;
+    color:green;
+    text-align:center;
+    margin-top:10px;
+}
+
+</style>
+
 </head>
+
+
 <body>
+
+
 <div class="container">
-<h1>Inventory Scanner V3</h1>
+
+
+<h2>Inventory Scanner V3</h2>
+
 
 <div class="mode">
-<button id="inBtn" class="active">IN</button>
-<button id="outBtn">OUT</button>
+Mode: <span id="modeText">IN</span>
 </div>
 
-<div id="camera" class="card">
-<h2>Camera</h2>
-<div id="reader"></div>
-</div>
 
-<div class="card">
+<button id="inBtn" class="active">
+IN
+</button>
+
+<button id="outBtn" class="out">
+OUT
+</button>
+
+
+
+<div id="camera"></div>
+
+
+
 <label>Barcode</label>
-<input id="barcode" type="text" readonly>
+<input id="barcode" readonly placeholder="Waiting for Scan...">
+
+
 
 <label>Product Name</label>
-<input id="productName" type="text" readonly>
+<input id="productName" readonly>
 
-<label>Expiry Date</label>
-<select id="expiry"></select>
+
 
 <label>Batch Number</label>
-<input id="batchNumber" type="text" readonly>
+<input id="batchNumber">
+
+
+
+<label>Expiry Date</label>
+<input type="date" id="expiry">
+
+
 
 <label>Pieces</label>
-<input id="pieces" type="number">
+<input type="number" id="pieces">
+
+
 
 <label>Cartons</label>
-<input id="cartons" type="number">
+<input type="number" id="cartons">
+
+
 
 <label>Qty (KG)</label>
-<input id="qty" type="number" step="0.01">
+<input type="number" step="0.01" id="qty">
+
+
 
 <label>Writer</label>
+
 <select id="writer">
-<option value="">Select Writer</option>
+
+<option value="">Select</option>
+<option>Sitong</option>
+<option>Yazhen</option>
+<option>KM</option>
+<option>JIANGHUA</option>
+<option>Ky</option>
+<option>Kyaw</option>
+
 </select>
 
-<button id="submitBtn">Submit</button>
+
+
+<button id="submitBtn">
+Submit
+</button>
+
+
+<div id="successMessage">
+Saved Successfully
 </div>
 
-<div id="successMessage" style="display:none;">✅ Successfully Saved</div>
+
+
 </div>
+
+
+<script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
+
+
 <script src="script.js"></script>
+
+
 </body>
+
 </html>
