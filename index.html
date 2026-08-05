@@ -1,84 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Inventory Scanner V3</title>
 
-<style>
-
-body{
-    font-family: Arial;
-    background:#f2f2f2;
-    margin:0;
-}
-
-.container{
-    max-width:420px;
-    margin:auto;
-    background:white;
-    padding:20px;
-    border-radius:15px;
-}
-
-h2{
-    text-align:center;
-}
-
-.mode{
-    text-align:center;
-    font-size:22px;
-    font-weight:bold;
-    margin-bottom:10px;
-}
-
-button{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    border:none;
-    border-radius:8px;
-    font-size:16px;
-}
-
-.active{
-    background:#28a745;
-    color:white;
-}
-
-.out{
-    background:#dc3545;
-    color:white;
-}
-
-input,select{
-    width:100%;
-    padding:10px;
-    margin-top:8px;
-    box-sizing:border-box;
-}
-
-#camera{
-    width:100%;
-    height:260px;
-    overflow:hidden;
-    margin-top:15px;
-}
-
-video{
-    width:100%;
-}
-
-#successMessage{
-    display:none;
-    color:green;
-    text-align:center;
-    margin-top:10px;
-}
-
-</style>
+<link rel="stylesheet" href="style.css">
 
 </head>
 
@@ -89,97 +20,355 @@ video{
 <div class="container">
 
 
-<h2>Inventory Scanner V3</h2>
+<h1>📦 Inventory Scanner</h1>
 
 
-<div class="mode">
-Mode: <span id="modeText">IN</span>
+
+<!-- MODE -->
+
+<div id="modeBanner" class="mode-banner">
+
+🟢 CURRENT MODE : IN
+
 </div>
 
 
-<button id="inBtn" class="active">
-IN
+
+<!-- IN OUT BUTTON -->
+
+
+<div class="mode-buttons">
+
+
+<button id="btnIn" class="mode-btn active">
+
+🟢 IN
+
 </button>
 
-<button id="outBtn" class="out">
-OUT
+
+
+<button id="btnOut" class="mode-btn">
+
+⚪ OUT
+
 </button>
 
 
+</div>
 
-<div id="camera"></div>
 
+
+
+
+
+<!-- BARCODE -->
+
+
+<div class="form-group">
 
 
 <label>Barcode</label>
-<input id="barcode" readonly placeholder="Waiting for Scan...">
+
+
+<input
+
+type="text"
+
+id="barcode"
+
+placeholder="Waiting for Scan..."
+
+readonly>
+
+
+</div>
 
 
 
-<label>Product Name</label>
-<input id="productName" readonly>
 
 
 
-<label>Batch Number</label>
-<input id="batchNumber">
 
+<!-- PRODUCT -->
+
+
+<div class="form-group">
+
+
+<label>Product</label>
+
+
+<input
+
+type="text"
+
+id="product"
+
+placeholder="Auto Product"
+
+readonly>
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- CAMERA -->
+
+
+<div class="form-group">
+
+
+<label>Camera</label>
+
+
+<div id="reader"></div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- BATCH -->
+
+
+<div class="form-group">
+
+
+<label>Batch No.</label>
+
+
+<input
+
+type="text"
+
+id="batch"
+
+placeholder="Enter Batch No.">
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- EXPIRY -->
+
+
+<div class="form-group">
 
 
 <label>Expiry Date</label>
-<input type="date" id="expiry">
 
+
+<input
+
+type="date"
+
+id="expiry"
+
+readonly>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- PIECES -->
+
+
+<div class="form-group">
 
 
 <label>Pieces</label>
-<input type="number" id="pieces">
 
+
+<input
+
+type="number"
+
+id="pieces"
+
+placeholder="0">
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- CARTONS -->
+
+
+<div class="form-group">
 
 
 <label>Cartons</label>
-<input type="number" id="cartons">
 
+
+<input
+
+type="number"
+
+id="cartons"
+
+placeholder="0">
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- QTY -->
+
+
+<div class="form-group">
 
 
 <label>Qty (KG)</label>
-<input type="number" step="0.01" id="qty">
+
+
+<input
+
+type="number"
+
+id="qty"
+
+placeholder="0">
+
+
+</div>
 
 
 
-<label>Writer</label>
+
+
+
+
+
+
+<!-- WRITER -->
+
+
+<div class="form-group">
+
+
+<label>Written By</label>
+
 
 <select id="writer">
 
-<option value="">Select</option>
+
+<option value="">
+
+Select Staff
+
+</option>
+
+
 <option>Sitong</option>
+
+
 <option>Yazhen</option>
-<option>KM</option>
+
+
 <option>JIANGHUA</option>
-<option>Ky</option>
+
+
+<option>KM</option>
+
+
+<option>KY</option>
+
+
 <option>Kyaw</option>
+
 
 </select>
 
 
+</div>
+
+
+
+
+
+
+
+
+
+<!-- SUBMIT -->
+
 
 <button id="submitBtn">
-Submit
+
+
+ENTER / SUBMIT
+
+
 </button>
 
 
-<div id="successMessage">
-Saved Successfully
-</div>
 
 
 
 </div>
 
 
-<script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
+
+
+
+
+
+<!-- HTML5 QR CODE -->
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
+
+
+
+
+
+
+<!-- SCRIPT -->
 
 
 <script src="script.js"></script>
+
 
 
 </body>
